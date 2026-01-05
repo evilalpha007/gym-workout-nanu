@@ -5,16 +5,16 @@ const cors = require("cors");
 const { connectDB, isConnected } = require("./config/db");
 
 // Check required environment variables
-if (!process.env.MONGO_URI) {
-  console.error("❌ ERROR: MONGO_URI is not set in .env file");
+if (!process.env.MONGODB_URI) {
+  console.error(" ERROR: MONGODB_URI is not set in .env file");
   console.error(
-    "Please create a .env file with MONGO_URI=mongodb://localhost:27017/your-db-name"
+    "Please create a .env file with MONGODB_URI=mongodb://localhost:27017/your-db-name"
   );
   process.exit(1);
 }
 
 if (!process.env.JWT_SECRET) {
-  console.error("❌ ERROR: JWT_SECRET is not set in .env file");
+  console.error(" ERROR: JWT_SECRET is not set in .env file");
   console.error("Please add JWT_SECRET=your-secret-key to your .env file");
   process.exit(1);
 }
@@ -138,11 +138,7 @@ process.on("uncaughtException", (err) => {
 try {
   app.listen(PORT, () => {
     console.log(`\n✅ Server running on port ${PORT}`);
-    console.log(`✅ MongoDB: ${isConnected() ? "Connected" : "Not Connected"}`);
-    console.log(`✅ JWT_SECRET: ${process.env.JWT_SECRET ? "Set" : "Missing"}`);
-    console.log(`✅ CLOUDINARY_CLOUD_NAME: ${process.env.CLOUDINARY_CLOUD_NAME ? "Set" : "Missing"}`);
-    console.log(`\n📡 Ready to receive requests...\n`);
-    console.log(`🌐 Server URL: http://localhost:${PORT}`);
+ 
   });
 } catch (error) {
   console.error("❌ Failed to start server:", error);
