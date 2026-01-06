@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { User as UserIcon, Calendar, Ruler, Weight, Edit2, Save, X } from 'lucide-react';
+import imageCompression from 'browser-image-compression';
+import toast from 'react-hot-toast';
 
 const Profile = () => {
     const { username } = useParams();
@@ -15,6 +17,7 @@ const Profile = () => {
     const [avatarFile, setAvatarFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [selectedMedia, setSelectedMedia] = useState(null);
+    const [isCompressing, setIsCompressing] = useState(false);
 
     // Fetch Profile
     const { data, isLoading, error } = useQuery({
@@ -35,7 +38,24 @@ const Profile = () => {
             formData.append('bio', data.bio);
             
             if (avatarFile) {
-                formData.append('avatar', avatarFile);
+                // Compress avatar if it exists
+                let fileToUpload = avatarFile;
+                if (avatarFile.size > 1 * 1024 * 1024) {
+                    setIsCompressing(true);
+                    try {
+                        const options = {
+                            maxSizeMB: 1,
+                            maxWidthOrHeight: 1024,
+                            useWebWorker: true,
+                        };
+                        fileToUpload = await imageCompression(avatarFile, options);
+                    } catch (error) {
+                        console.error("Avatar compression error:", error);
+                    } finally {
+                        setIsCompressing(false);
+                    }
+                }
+                formData.append('avatar', fileToUpload);
             }
 
             const res = await api.put('/users/profile', formData, {
@@ -59,10 +79,13 @@ const Profile = () => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // 1MB Limit for avatar
-            if (file.size > 1 * 1024 * 1024) {
-                alert("Profile picture must be under 1MB");
+            // 10MB Limit for avatar selection (will be compressed)
+            if (file.size > 10 * 1024 * 1024) {
+                toast.error("Profile picture must be under 10MB");
                 return;
+            }
+            if (file.size > 1 * 1024 * 1024) {
+                toast.success("Image selected! It will be compressed before saving.");
             }
             setAvatarFile(file);
             setPreviewUrl(URL.createObjectURL(file));
@@ -145,9 +168,19 @@ const Profile = () => {
                             <textarea {...register('bio')} placeholder="Bio" className="bg-muted p-2 rounded border border-input h-10 resize-none" />
                              
                              <div className="col-span-2 flex gap-2 justify-end">
-                                <button type="button" onClick={() => { setIsEditing(false); setAvatarFile(null); setPreviewUrl(null); }} className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded">Cancel</button>
-                                <button type="submit" disabled={updateProfileMutation.isPending} className="px-4 py-2 text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded disabled:opacity-50">
-                                    {updateProfileMutation.isPending ? 'Saving...' : 'Save'}
+                                 <button type="button" onClick={() => { setIsEditing(false); setAvatarFile(null); setPreviewUrl(null); }} className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded">Cancel</button>
+                                <button type="submit" disabled={updateProfileMutation.isPending || isCompressing} className="px-4 py-2 text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded disabled:opacity-50 flex items-center gap-2">
+                                    {(updateProfileMutation.isPending || isCompressing) ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
+                                            {isCompressing ? 'Compressing...' : 'Saving...'}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save size={16} />
+                                            Save
+                                        </>
+                                    )}
                                 </button>
                              </div>
                         </form>
