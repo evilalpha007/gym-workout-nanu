@@ -226,7 +226,7 @@ const Profile = () => {
             {/* Media Viewer Modal */}
             {selectedMedia && (
                 <div 
-                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-200"
+                    className="fixed inset-0 z-100 flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-200"
                     onKeyDown={(e) => e.key === 'Escape' && setSelectedMedia(null)}
                 >
                     {/* Backdrop */}
