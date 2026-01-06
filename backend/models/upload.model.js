@@ -23,6 +23,15 @@ const uploadSchema = new mongoose.Schema({
   pointsAwarded: {
     type: Number,
     default: 3
+  },
+  uploadDate: {
+    type: Date,
+    required: true,
+    default: () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return today;
+    }
   }
 }, { timestamps: true });
 

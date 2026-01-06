@@ -4,7 +4,8 @@ const {
     getQuests, 
     submitQuestEntry, 
     getQuestSubmissions, 
-    evaluateSubmission 
+    evaluateSubmission,
+    getUserQuestSubmissions
 } = require('../controllers/quest.controller');
 const { protect, admin } = require('../middleware/auth.middleware');
 const { upload } = require('../config/cloudinary');
@@ -13,6 +14,7 @@ const router = express.Router();
 
 // Public/Protected
 router.route('/').get(protect, getQuests);
+router.route('/my-submissions').get(protect, getUserQuestSubmissions);
 router.route('/:id/submit').post(protect, upload.single('media'), submitQuestEntry);
 
 // Admin Routes

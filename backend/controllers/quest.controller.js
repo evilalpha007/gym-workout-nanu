@@ -139,10 +139,28 @@ const evaluateSubmission = async (req, res) => {
     }
 }
 
+// @desc    Get current user's quest submissions
+// @route   GET /api/quests/my-submissions
+// @access  Protected
+const getUserQuestSubmissions = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const submissions = await QuestSubmission.find({ userId })
+            .populate('questId', 'title description startDate endDate')
+            .sort({ createdAt: -1 });
+        
+        res.status(200).json(submissions);
+    } catch (error) {
+        console.error('Error in getUserQuestSubmissions', error.message);
+        res.status(500).json({ error: 'Server Error' });
+    }
+}
+
 module.exports = {
     createQuest,
     getQuests,
     submitQuestEntry,
     getQuestSubmissions,
-    evaluateSubmission
+    evaluateSubmission,
+    getUserQuestSubmissions
 };
