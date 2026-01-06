@@ -15,6 +15,8 @@ const generateTokenAndSetCookie = (userId, res) => {
     sameSite: process.env.NODE_ENV === "development" ? "lax" : "none", // support cross-site cookies in prod
     secure: process.env.NODE_ENV === "development" ? false : true, // required for sameSite: "none"
   });
+
+  return token;
 };
 
 module.exports = generateTokenAndSetCookie;

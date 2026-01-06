@@ -82,16 +82,7 @@ const signup = async (req, res) => {
     console.log("✅ User created successfully:", user._id);
 
     if (user) {
-      try {
-        generateTokenAndSetCookie(user._id, res);
-      } catch (tokenError) {
-        console.error("Error generating token:", tokenError);
-        // User is created but token generation failed
-        return res.status(500).json({
-          error: "User created but failed to generate authentication token",
-          details: tokenError.message,
-        });
-      }
+      const token = generateTokenAndSetCookie(user._id, res);
 
       res.status(201).json({
         _id: user._id,
@@ -100,6 +91,7 @@ const signup = async (req, res) => {
         role: user.role,
         avatar: user.avatar,
         targetWorkoutDaysPerWeek: user.targetWorkoutDaysPerWeek,
+        token, // Send token in body for reliable auth in production
       });
     } else {
       res.status(400).json({ error: "Invalid user data" });
@@ -149,7 +141,7 @@ const login = async (req, res) => {
       return res.status(400).json({ error: "Invalid username or password" });
     }
 
-    generateTokenAndSetCookie(user._id, res);
+    const token = generateTokenAndSetCookie(user._id, res);
 
     res.status(200).json({
       _id: user._id,
@@ -158,6 +150,7 @@ const login = async (req, res) => {
       role: user.role,
       avatar: user.avatar,
       targetWorkoutDaysPerWeek: user.targetWorkoutDaysPerWeek,
+      token, // Send token in body for reliable auth in production
     });
   } catch (error) {
     console.error("Error in login controller", error.message);

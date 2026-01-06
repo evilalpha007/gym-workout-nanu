@@ -37,6 +37,9 @@ export const AuthProvider = ({ children }) => {
       return res.data;
     },
     onSuccess: (data) => {
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
       setUser(data);
       navigate("/");
     },
@@ -58,6 +61,9 @@ export const AuthProvider = ({ children }) => {
       return res.data;
     },
     onSuccess: (data) => {
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
       setUser(data);
       navigate("/");
     },
@@ -78,6 +84,7 @@ export const AuthProvider = ({ children }) => {
       await api.post("/auth/logout");
     },
     onSuccess: () => {
+      localStorage.removeItem("token");
       setUser(null);
       queryClient.clear();
       navigate("/login");
