@@ -14,6 +14,7 @@ const Profile = () => {
     const { register, handleSubmit, reset } = useForm();
     const [avatarFile, setAvatarFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
+    const [selectedMedia, setSelectedMedia] = useState(null);
 
     // Fetch Profile
     const { data, isLoading, error } = useQuery({
@@ -161,7 +162,11 @@ const Profile = () => {
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {gallery.map((item) => (
-                         <div key={item._id} className="aspect-square bg-muted rounded-xl overflow-hidden relative group">
+                         <div 
+                            key={item._id} 
+                            className="aspect-square bg-muted rounded-xl overflow-hidden relative group cursor-pointer"
+                            onClick={() => setSelectedMedia(item)}
+                         >
                             {item.mediaType === 'video' ? (
                                 <video src={item.mediaUrl} className="w-full h-full object-cover" />
                             ) : (
@@ -184,6 +189,65 @@ const Profile = () => {
                     )}
                 </div>
             </div>
+
+            {/* Media Viewer Modal */}
+            {selectedMedia && (
+                <div 
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-200"
+                    onKeyDown={(e) => e.key === 'Escape' && setSelectedMedia(null)}
+                >
+                    {/* Backdrop */}
+                    <div 
+                        className="absolute inset-0 bg-black/95 backdrop-blur-md"
+                        onClick={() => setSelectedMedia(null)}
+                    />
+                    
+                    {/* Content Container */}
+                    <div className="relative z-10 max-w-5xl w-full max-h-full flex flex-col items-center justify-center animate-in zoom-in-95 duration-300">
+                        {/* Close button */}
+                        <button 
+                            onClick={() => setSelectedMedia(null)}
+                            className="absolute -top-12 right-0 md:-right-12 md:top-0 p-2 text-white/70 hover:text-white transition-colors"
+                        >
+                            <X size={32} />
+                        </button>
+
+                        <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 flex items-center justify-center bg-black/20">
+                            {selectedMedia.mediaType === 'video' ? (
+                                <video 
+                                    src={selectedMedia.mediaUrl} 
+                                    controls 
+                                    autoPlay
+                                    className="max-w-full max-h-[80vh] w-auto h-auto object-contain"
+                                />
+                            ) : (
+                                <img 
+                                    src={selectedMedia.mediaUrl} 
+                                    alt="Workout enlarged" 
+                                    className="max-w-full max-h-[80vh] w-auto h-auto object-contain"
+                                />
+                            )}
+                        </div>
+
+                        {/* Caption/Metadata */}
+                        <div className="mt-4 text-center">
+                            <p className="text-white/90 font-bold flex items-center gap-2 justify-center">
+                                <Calendar size={16} className="text-primary" />
+                                {new Date(selectedMedia.createdAt).toLocaleDateString(undefined, {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })}
+                            </p>
+                            {selectedMedia.type && (
+                                <span className="inline-block mt-2 px-3 py-1 bg-primary/20 text-primary text-xs font-bold rounded-full border border-primary/30 uppercase tracking-widest">
+                                    {selectedMedia.type}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
