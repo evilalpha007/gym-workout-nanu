@@ -12,8 +12,8 @@ const generateTokenAndSetCookie = (userId, res) => {
   res.cookie("jwt", token, {
     maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
     httpOnly: true, // prevent XSS attacks
-    sameSite: "strict", // CSRF protection
-    secure: process.env.NODE_ENV !== "development", // only https in prod
+    sameSite: process.env.NODE_ENV === "development" ? "lax" : "none", // support cross-site cookies in prod
+    secure: process.env.NODE_ENV === "development" ? false : true, // required for sameSite: "none"
   });
 };
 
